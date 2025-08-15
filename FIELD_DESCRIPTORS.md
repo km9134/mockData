@@ -65,25 +65,76 @@ Generate random strings with prefixes and specified length:
 
 ## Complete Example
 
+**Request:**
+```json
+{
+  "fields": [
+    "name",
+    "email", 
+    "department[sales,marketing,engineering]",
+    "employee_id[EMP,5,int]",
+    "status[active,inactive]"
+  ],
+  "size": 10,
+  "output_format": "json",
+  "table_name": "employees"
+}
+```
+
+**Parameters:**
+- `size` - Number of rows to generate
+- `table_name` - Table name for SQL format (optional)
+
+**Available output_format options:**
+- `"json"` - Pretty formatted JSON
+- `"compact_json"` - Minified JSON
+- `"csv"` - CSV with headers
+- `"sql"` - SQL INSERT statements
+
+**Sample JSON Output:**
 ```json
 [
-  "name",
-  "email", 
-  "department[sales,marketing,engineering]",
-  "employee_id[EMP,5,int]",
-  "status[active,inactive]"
+  {
+    "name": "John Smith",
+    "email": "john.smith@example.com",
+    "department": "engineering",
+    "employee_id": "EMP12345",
+    "status": "active"
+  }
 ]
 ```
 
-**Sample Output:**
+## Output Formats
+
+The system supports multiple output formats:
+
+### JSON (Pretty)
 ```json
-{
-  "name": "John Smith",
-  "email": "john.smith@example.com",
-  "department": "engineering",
-  "employee_id": "EMP12345",
-  "status": "active"
-}
+[
+  {
+    "name": "John Smith",
+    "status": "active"
+  }
+]
+```
+
+### Compact JSON
+```json
+[{"name":"John Smith","status":"active"}]
+```
+
+### CSV
+```csv
+name,status
+John Smith,active
+Jane Doe,inactive
+```
+
+### SQL
+```sql
+INSERT INTO table_name (name, status) VALUES
+  ('John Smith', 'active'),
+  ('Jane Doe', 'inactive');
 ```
 
 ## Fallback Behavior

@@ -2,6 +2,7 @@ import unittest
 import json
 import csv
 import io
+import time
 from generator.faker_generator import generate_row, generate_chunk, generate_data
 
 
@@ -97,6 +98,47 @@ class TestFakerGenerator(unittest.TestCase):
         self.assertIn("VALUES", result)
         self.assertIn(";", result)
         self.assertTrue(result.count("(") == result.count(")"))  # balanced parentheses
+
+    def test_performance_10000_rows(self):
+        fields = [
+            "name",
+            "email", 
+            "address",
+            "phone_number",
+            "company",
+            "job",
+            "priority[critical,high,medium,low,none]",
+            "product_code[PROD,10,str]"
+        ]
+        
+        start_time = time.time()
+        result = generate_chunk(fields, 10000)
+        chunk_time = time.time() - start_time
+        
+        # Test SQL generation time
+        start_time = time.time()
+        sql_result = generate_data(fields, 10000, "sql", "performance_test")
+        sql_time = time.time() - start_time
+        
+        with open("/Users/kylemoffett/Documents/Development/mockDataLambda/tests/testOutputs/performance_10000.sql", "w") as f:
+            f.write(sql_result)
+        
+        total_time = chunk_time + sql_time
+        
+        # Save timing info to file for inspection
+        with open("/Users/kylemoffett/Documents/Development/mockDataLambda/tests/testOutputs/performance.txt", "w") as f:
+            f.write(f"Generated 10000 rows with 8 columns in {chunk_time:.4f} seconds\n")
+            f.write(f"SQL formatting took {sql_time:.4f} seconds\n")
+            f.write(f"Total time: {total_time:.4f} seconds\n")
+            f.write(f"Average time per row: {total_time/100:.6f} seconds\n")
+        
+        self.assertEqual(len(result), 10000)
+        self.assertLess(total_time, 20.0)  # Should complete within 5 seconds
+        for row in result:
+            self.assertEqual(len(row), 8)
+            self.assertIn(row["priority"], ["critical", "high", "medium", "low", "none"])
+            self.assertTrue(row["product_code"].startswith("PROD"))
+            self.assertEqual(len(row["product_code"]), 14)  # PROD + 10 chars
 
 
 if __name__ == '__main__':
