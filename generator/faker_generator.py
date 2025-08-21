@@ -58,7 +58,27 @@ def generate_row(fields):
             try:
                 faker_method = getattr(fake, name)
                 if args:
-                    row[name] = faker_method(*args)
+                    # Convert string args to kwargs if they contain '='
+                    kwargs = {}
+                    for arg in args:
+                        if '=' in arg:
+                            key, value = arg.split('=', 1)
+                            # Try to convert to int if possible
+                            try:
+                                kwargs[key] = int(value)
+                            except ValueError:
+                                kwargs[key] = value
+                        else:
+                            # Positional arg, try to convert to int
+                            try:
+                                kwargs.setdefault('args', []).append(int(arg))
+                            except ValueError:
+                                kwargs.setdefault('args', []).append(arg)
+                    
+                    if 'args' in kwargs:
+                        row[name] = faker_method(*kwargs.pop('args'), **kwargs)
+                    else:
+                        row[name] = faker_method(**kwargs)
                 else:
                     row[name] = faker_method()
             except AttributeError:
@@ -68,7 +88,7 @@ def generate_row(fields):
 def generate_chunk(fields, size):
     return [generate_row(fields) for _ in range(size)]
 
-def generate_data(fields, size, output_format="json", table_name="mock_data"):
+def generate_data(fields, size, output_format="compact_json", table_name="mock_data"):
     """Generate data in specified format"""
     from .formatters import format_as_json, format_as_compact_json, format_as_csv, format_as_sql
     
@@ -83,4 +103,4 @@ def generate_data(fields, size, output_format="json", table_name="mock_data"):
     elif output_format.lower() == "sql":
         return format_as_sql(data, table_name)
     else:
-        return data  # return raw data if format not recognized
+        return format_as_compact_json(data)  # return data as compact json
