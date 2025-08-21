@@ -89,7 +89,7 @@ class TestFakerGenerator(unittest.TestCase):
         ]
         result = generate_chunk(fields, 100)
         
-        with open("/Users/kylemoffett/Documents/Development/mockDataLambda/test_output.json", "w") as f:
+        with open("/Users/kylemoffett/Documents/Development/mockDataLambda/tests/testOutputs/test_output.json", "w") as f:
             json.dump(result, f, indent=2)
         
         self.assertEqual(len(result), 100)
