@@ -4,8 +4,11 @@ import csv
 import io
 import sys
 from pathlib import Path
-sys.path.append(str(Path(__file__).parent.parent.parent))
-from generator.formatters import format_as_json, format_as_compact_json, format_as_csv, format_as_sql
+
+# Add project root to Python path
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+
+from lambda_function.generator.formatters import format_as_json, format_as_compact_json, format_as_csv, format_as_sql
 
 
 class TestFormatters(unittest.TestCase):

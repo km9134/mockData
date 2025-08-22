@@ -1,5 +1,11 @@
 import json
 import os
+import sys
+from pathlib import Path
+
+# Add current directory to path for generator imports
+sys.path.insert(0, str(Path(__file__).parent))
+
 from generator.faker_generator import generate_row, generate_chunk
 from generator.s3_uploader import upload_chunk_to_s3
 

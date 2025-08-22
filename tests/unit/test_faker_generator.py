@@ -5,28 +5,28 @@ import io
 import time
 import sys
 from pathlib import Path
-sys.path.append(str(Path(__file__).parent.parent.parent))
-from generator.faker_generator import generate_row, generate_chunk, generate_data
+
+# Add project root to Python path
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+
+from lambda_function.generator.faker_generator import generate_row, generate_chunk, generate_data, parse_field
 
 
 class TestFakerGenerator(unittest.TestCase):
 
     def test_parse_field_with_brackets(self):
-        from generator.faker_generator import parse_field
         name, options, args = parse_field("status[active,inactive]")
         self.assertEqual(name, "status")
         self.assertEqual(options, ["active", "inactive"])
         self.assertIsNone(args)
 
     def test_parse_field_with_parentheses(self):
-        from generator.faker_generator import parse_field
         name, options, args = parse_field("date_between(start_date=-30d,end_date=today)")
         self.assertEqual(name, "date_between")
         self.assertIsNone(options)
         self.assertEqual(args, ["start_date=-30d", "end_date=today"])
 
     def test_parse_field_simple(self):
-        from generator.faker_generator import parse_field
         name, options, args = parse_field("name")
         self.assertEqual(name, "name")
         self.assertIsNone(options)

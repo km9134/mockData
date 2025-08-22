@@ -3,10 +3,13 @@ import json
 import os
 import sys
 from pathlib import Path
-sys.path.append(str(Path(__file__).parent.parent.parent))
+
+# Add project root to Python path
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+
 from moto import mock_aws
 import boto3
-from lambda_function import lambda_handler
+from lambda_function.lambda_function import lambda_handler
 
 # Set environment variable for S3 bucket (optional)
 os.environ['S3_BUCKET'] = 'test-bucket'

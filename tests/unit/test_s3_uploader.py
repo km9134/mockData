@@ -2,14 +2,17 @@ import unittest
 from unittest.mock import patch, MagicMock
 import sys
 from pathlib import Path
-sys.path.append(str(Path(__file__).parent.parent.parent))
-from generator.s3_uploader import upload_chunk_to_s3
+
+# Add project root to Python path
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+
+from lambda_function.generator.s3_uploader import upload_chunk_to_s3
 
 
 class TestS3Uploader(unittest.TestCase):
     """Test cases for S3 uploader functionality"""
 
-    @patch('generator.s3_uploader.boto3.client')  # Mock boto3 to avoid real AWS calls
+    @patch('lambda_function.generator.s3_uploader.boto3.client')  # Mock boto3 to avoid real AWS calls
     def test_upload_chunk_to_s3(self, mock_boto3_client):
         # Setup mock S3 client
         mock_s3 = MagicMock()
