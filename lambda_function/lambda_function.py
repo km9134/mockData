@@ -12,7 +12,7 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 from generator.faker_generator import generate_row, generate_chunk
-from generator.s3_uploader import upload_chunk_to_s3
+from generator.s3_uploader import create_unique_bucket_and_upload
 
 class CustomJSONEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -81,25 +81,17 @@ def handle_bulk_data(fields, query_params, body):
     """Generate bulk data and save to S3"""
     # Get parameters
     size = int(query_params.get('size') or body.get('size', 100))
-    bucket_name = query_params.get('bucket') or body.get('bucket') or os.environ.get('S3_BUCKET')
     dataset_id = query_params.get('dataset_id') or body.get('dataset_id', 'mock_dataset')
     
-    logger.info(f"Bulk request: size={size}, bucket={bucket_name}, dataset_id={dataset_id}")
-    
-    if not bucket_name:
-        logger.error("No S3 bucket specified")
-        return {
-            'statusCode': 400,
-            'body': json.dumps({'error': 'S3 bucket name required'})
-        }
+    logger.info(f"Bulk request: size={size}, dataset_id={dataset_id}")
     
     try:
         # Generate data
         logger.info(f"Generating {size} rows with {len(fields)} fields")
         data = generate_chunk(fields, size)
         
-        # Upload to S3
-        s3_key = upload_chunk_to_s3(data, bucket_name, dataset_id, 'bulk')
+        # Create unique bucket and upload to S3
+        bucket_name, s3_key = create_unique_bucket_and_upload(data, dataset_id, 'bulk')
         
         return {
             'statusCode': 200,
@@ -107,6 +99,7 @@ def handle_bulk_data(fields, query_params, body):
             'body': json.dumps({
                 'message': f'Generated {size} rows',
                 's3_location': f's3://{bucket_name}/{s3_key}',
+                'bucket_name': bucket_name,
                 'records_count': len(data)
             })
         }

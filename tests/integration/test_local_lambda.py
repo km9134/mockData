@@ -33,16 +33,11 @@ def test_single_endpoint():
 @mock_aws
 def test_bulk_endpoint():
     """Test /bulk endpoint with mock S3"""
-    # Create mock S3 bucket
-    s3 = boto3.client('s3', region_name='us-east-1')
-    s3.create_bucket(Bucket='test-bucket')
-    
     event = {
         'httpMethod': 'POST',
         'path': '/bulk',
         'body': json.dumps({
             'size': 5,
-            'bucket': 'test-bucket',
             'dataset_id': 'test_dataset',
             'fields': ['name', 'email', 'company']
         })
