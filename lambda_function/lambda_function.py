@@ -1,11 +1,15 @@
 import json
 import os
 import sys
+import logging
 from pathlib import Path
 from datetime import date, datetime
 
 # Add current directory to path for generator imports
 sys.path.insert(0, str(Path(__file__).parent))
+
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 
 from generator.faker_generator import generate_row, generate_chunk
 from generator.s3_uploader import upload_chunk_to_s3
@@ -80,24 +84,35 @@ def handle_bulk_data(fields, query_params, body):
     bucket_name = query_params.get('bucket') or body.get('bucket') or os.environ.get('S3_BUCKET')
     dataset_id = query_params.get('dataset_id') or body.get('dataset_id', 'mock_dataset')
     
+    logger.info(f"Bulk request: size={size}, bucket={bucket_name}, dataset_id={dataset_id}")
+    
     if not bucket_name:
+        logger.error("No S3 bucket specified")
         return {
             'statusCode': 400,
             'body': json.dumps({'error': 'S3 bucket name required'})
         }
     
-    # Generate data
-    data = generate_chunk(fields, size)
-    
-    # Upload to S3
-    s3_key = upload_chunk_to_s3(data, bucket_name, dataset_id, 'bulk')
-    
-    return {
-        'statusCode': 200,
-        'headers': {'Content-Type': 'application/json'},
-        'body': json.dumps({
-            'message': f'Generated {size} rows',
-            's3_location': f's3://{bucket_name}/{s3_key}',
-            'records_count': len(data)
-        })
-    }
+    try:
+        # Generate data
+        logger.info(f"Generating {size} rows with fields: {fields}")
+        data = generate_chunk(fields, size)
+        
+        # Upload to S3
+        s3_key = upload_chunk_to_s3(data, bucket_name, dataset_id, 'bulk')
+        
+        return {
+            'statusCode': 200,
+            'headers': {'Content-Type': 'application/json'},
+            'body': json.dumps({
+                'message': f'Generated {size} rows',
+                's3_location': f's3://{bucket_name}/{s3_key}',
+                'records_count': len(data)
+            })
+        }
+    except Exception as e:
+        logger.error(f"Error in bulk data generation: {str(e)}")
+        return {
+            'statusCode': 500,
+            'body': json.dumps({'error': str(e)})
+        }
