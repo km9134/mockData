@@ -14,7 +14,7 @@ coverage:
 	coverage run --source=lambda_function/generator tests/unit/test_faker_generator.py
 	coverage run -a --source=lambda_function/generator tests/unit/test_formatters.py
 	coverage run -a --source=lambda_function/generator tests/unit/test_s3_uploader.py
-	coverage report
+	coverage report --skip-empty
 	coverage html
 
 coverage-check:
