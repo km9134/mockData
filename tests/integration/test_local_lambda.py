@@ -20,7 +20,7 @@ def test_single_endpoint():
         'httpMethod': 'GET',
         'path': '/single',
         'queryStringParameters': {
-            'fields': 'name,machine_type[sewing,printer],status[active,inactive],user_id[ID,3,int]'
+            'fields': 'name,machine_type[sewing,printer],status[active,inactive],user_id[ID,3,int],date_of_birth(minimum_age=30,maximum_age=50),ean13'
         }
     }
     

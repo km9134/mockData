@@ -2,12 +2,19 @@ import json
 import os
 import sys
 from pathlib import Path
+from datetime import date, datetime
 
 # Add current directory to path for generator imports
 sys.path.insert(0, str(Path(__file__).parent))
 
 from generator.faker_generator import generate_row, generate_chunk
 from generator.s3_uploader import upload_chunk_to_s3
+
+class CustomJSONEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, (date, datetime)):
+            return obj.isoformat()
+        return str(obj)
 
 def lambda_handler(event, context):
     try:
@@ -29,9 +36,9 @@ def lambda_handler(event, context):
         # Get fields from query params or body
         fields = query_params.get('fields') or body.get('fields')
         if isinstance(fields, str):
-            # Split by comma but preserve bracket content
+            # Split by comma but preserve bracket and parentheses content
             import re
-            fields = re.findall(r'[^,\[]*(?:\[[^\]]*\])?[^,]*', fields)
+            fields = re.split(r',(?![^\[\(]*[\]\)])', fields)
             fields = [f.strip() for f in fields if f.strip()]
         
         if not fields:
@@ -63,7 +70,7 @@ def handle_single_row(fields):
     return {
         'statusCode': 200,
         'headers': {'Content-Type': 'application/json'},
-        'body': json.dumps(row)
+        'body': json.dumps(row, cls=CustomJSONEncoder)
     }
 
 def handle_bulk_data(fields, query_params, body):
