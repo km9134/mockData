@@ -95,7 +95,7 @@ def handle_bulk_data(fields, query_params, body):
     
     try:
         # Generate data
-        logger.info(f"Generating {size} rows with fields: {fields}")
+        logger.info(f"Generating {size} rows with {len(fields)} fields")
         data = generate_chunk(fields, size)
         
         # Upload to S3
