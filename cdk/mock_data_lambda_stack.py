@@ -2,6 +2,7 @@ from aws_cdk import (
     Stack,
     aws_s3 as s3,
     aws_apigateway as apigw,
+    aws_iam as iam,
     Duration,
     CfnOutput,
     RemovalPolicy,
@@ -39,6 +40,15 @@ class MockDataLambdaStack(Stack):
 
         # Grant Lambda write permissions to the S3 bucket
         data_bucket.grant_write(mock_data_lambda)
+        
+        # Grant Lambda permissions to create S3 buckets
+        mock_data_lambda.add_to_role_policy(
+            iam.PolicyStatement(
+                effect=iam.Effect.ALLOW,
+                actions=["s3:CreateBucket", "s3:PutObject", "s3:PutBucketPolicy", "s3:PutBucketPublicAccessBlock"],
+                resources=["arn:aws:s3:::mock-data-*", "arn:aws:s3:::mock-data-*/*"]
+            )
+        )
 
         # API Gateway
         api = apigw.LambdaRestApi(
