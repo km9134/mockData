@@ -24,13 +24,13 @@ class MockDataLambdaStack(Stack):
             removal_policy=RemovalPolicy.DESTROY
         )
 
-        # Lambda function
+        # Lambda function with automatic dependency bundling
         mock_data_lambda = PythonFunction(
             self, "MockDataLambda",
-            entry="../lambda_function",       # folder containing lambda_function.py + requirements.txt
-            index="lambda_function.py",       # your Lambda file
-            handler="lambda_handler",         # function name in that file
-            runtime=Runtime.PYTHON_3_11,      # recommended newer runtime
+            entry="../lambda_function",
+            index="lambda_function.py",
+            handler="lambda_handler",
+            runtime=Runtime.PYTHON_3_11,
             timeout=Duration.minutes(15),
             memory_size=256,
             environment={
