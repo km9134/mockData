@@ -26,7 +26,6 @@ def test_single_endpoint():
     }
     
     response = lambda_handler(event, {})
-    print(f"Debug - Status: {response['statusCode']}, Body: {response.get('body', 'No body')}")
     assert response['statusCode'] == 200
     data = json.loads(response['body'])
     assert len(data) == 3
