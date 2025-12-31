@@ -58,13 +58,13 @@ class MockDataLambdaStack(Stack):
         )
 
         # /single endpoint
-        single = api.root.add_resource("single")
+        single = api.root.add_resource("data")
         single.add_method("GET")
-        single.add_method("POST")
 
         # /bulk endpoint
         bulk = api.root.add_resource("bulk")
         bulk.add_method("GET")
+        bulk.add_method("POST")
 
         # Output the API URL
         CfnOutput(

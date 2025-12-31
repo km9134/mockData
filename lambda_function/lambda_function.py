@@ -52,8 +52,8 @@ def lambda_handler(event, context):
             }
         
         # Route to appropriate endpoint
-        if path == '/single' or path.endswith('/single'):
-            return handle_single_row(fields)
+        if path == '/data' or path.endswith('/data'):
+            return handle_single_row(fields, query_params, body)
         elif path == '/bulk' or path.endswith('/bulk'):
             return handle_bulk_data(fields, query_params, body)
         else:
@@ -68,13 +68,35 @@ def lambda_handler(event, context):
             'body': json.dumps({'error': str(e)})
         }
 
-def handle_single_row(fields):
-    """Return a single row of mock data"""
-    row = generate_row(fields)
+def handle_single_row(fields, query_params, body):
+    """Return mock data with configurable rows and columns (max 200 data points)"""
+    # Get rows parameter
+    rows = int(query_params.get('rows') or body.get('rows', 1))
+    columns = len(fields)
+    
+    # Validate data point limit (rows * columns <= 200)
+    total_data_points = rows * columns
+    if total_data_points > 200:
+        return {
+            'statusCode': 400,
+            'body': json.dumps({
+                'error': f'Total data points ({total_data_points}) exceeds limit of 200. '
+                        f'Reduce rows ({rows}) or columns ({columns}).'
+            })
+        }
+    
+    # Generate data
+    if rows == 1:
+        # Single row - return as object
+        data = generate_row(fields)
+    else:
+        # Multiple rows - return as array
+        data = generate_chunk(fields, rows)
+    
     return {
         'statusCode': 200,
         'headers': {'Content-Type': 'application/json'},
-        'body': json.dumps(row, cls=CustomJSONEncoder)
+        'body': json.dumps(data, cls=CustomJSONEncoder)
     }
 
 def handle_bulk_data(fields, query_params, body):
