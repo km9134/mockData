@@ -6,7 +6,7 @@ This API generates mock data using Faker providers and custom field types. It su
 ## Endpoints
 
 ### Single Record Generation
-- **URL**: `/single`
+- **URL**: `/data`
 - **Method**: `GET`
 - **Query Parameter**: `fields` - comma-separated list of field definitions
 
@@ -48,7 +48,7 @@ Use square brackets with ID prefix, length, and type:
 
 ### Single Record Request
 ```bash
-GET /single?fields=name,email,machine_type[sewing,printer],status[active,inactive],customer_id[ID,6,int],date_of_birth(minimum_age=30,maximum_age=50),ean13
+GET /data?fields=name,email,machine_type[sewing,printer],status[active,inactive],customer_id[ID,6,int],date_of_birth(minimum_age=30,maximum_age=50),ean13
 ```
 
 ### Single Record Response
